@@ -4,7 +4,7 @@ import com.yahoo.athenz.zpe.AuthZpeClient;
 public class Authorizer {
 
   private final boolean isRequired;
-  private static final String DEFAULT_JWK_URI = "https://localhost:8443/zts/v1/jwk";
+  private static final String DEFAULT_JWK_URI = "https://localhost:8443/zts/v1/oauth2/keys?rfc=true";
 
   public Authorizer() {
     this.isRequired = Boolean.parseBoolean(System.getenv().getOrDefault("AT_REQUIRED", "true"));
