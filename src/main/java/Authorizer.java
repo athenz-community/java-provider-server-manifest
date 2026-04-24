@@ -1,17 +1,60 @@
+import com.sun.net.httpserver.HttpExchange;
 import com.yahoo.athenz.zpe.AuthZpeClient;
 
 public class Authorizer {
 
+  private final boolean isRequired;
+  private static final String DEFAULT_JWK_URI = "https://localhost:8443/zts/v1/jwk";
+
   public Authorizer() {
-    AuthZpeClient.init();
+    this.isRequired = Boolean.parseBoolean(System.getenv().getOrDefault("AT_REQUIRED", "true"));
+
+    if (this.isRequired) {
+      if (System.getProperty("athenz.zpe.jwk_uri") == null) {
+        System.setProperty("athenz.zpe.jwk_uri", DEFAULT_JWK_URI);
+      }
+      AuthZpeClient.init();
+    }
   }
 
-  public void authorize(String action, String resource, String accessToken) {
-    if (accessToken == null || accessToken.isEmpty()) {
-      throw new IllegalArgumentException("Authorization header is missing or invalid Bearer token.");
+  public boolean isRequired() {
+    return this.isRequired;
+  }
+
+  private String getAction(HttpExchange exchange) {
+    String method = exchange.getRequestMethod();
+
+    switch (method.toUpperCase()) {
+      case "GET":
+        return "get";
+      case "POST":
+        return "post";
+      case "PUT":
+        return "put";
+      case "PATCH":
+        return "patch";
+      case "DELETE":
+        return "delete";
+      default:
+        throw new IllegalArgumentException("Invalid HTTP method: " + method);
+    }
+  }
+
+  public void authorizeRequest(HttpExchange exchange, String resource) {
+    if (!this.isRequired) {
+      return;
     }
 
-    AuthZpeClient.AccessCheckStatus status = AuthZpeClient.allowAccess(accessToken, resource, action);
+    String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
+    String token = (authHeader != null && authHeader.startsWith("Bearer "))
+        ? authHeader.substring(7)
+        : null;
+
+    if (token == null || token.isEmpty()) {
+      throw new IllegalArgumentException("Authorization header is missing or invalid Bearer token.");
+    }
+    String action = getAction(exchange);
+    AuthZpeClient.AccessCheckStatus status = AuthZpeClient.allowAccess(token, resource, action);
 
     if (status != AuthZpeClient.AccessCheckStatus.ALLOW) {
       throw new SecurityException(String.format("Token does not have '%s' action on '%s'", action, resource));
