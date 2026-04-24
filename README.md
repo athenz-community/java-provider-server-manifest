@@ -1,44 +1,10 @@
-
-
-```
-mvn clean compile -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true
-```
-
-
-```
-mvn compile -Dmaven.resolver.transport=wagon -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true
-```
+Run the server locally:
 
 ```sh
-mvn compile \
-  -Dmaven.resolver.transport=wagon \
-  -Dmaven.wagon.http.ssl.insecure=true \
-  -Dmaven.wagon.http.ssl.allowall=true \
-  -Dmaven.wagon.http.ssl.ignore.validity.dates=true
+make local
 ```
 
-Then:
-
-```sh
-mvn compile
-```
-
-Then:
-
-```sh
-mvn exec:java \
-  -U \
-  -Dmaven.resolver.transport=wagon \
-  -Dmaven.wagon.http.ssl.insecure=true \
-  -Dmaven.wagon.http.ssl.allowall=true \
-  -Dmaven.wagon.http.ssl.ignore.validity.dates=true
-```
-
-```sh
-mvn exec:java
-```
-
-Then:
+Then, open a new terminal and run:
 
 ```sh
 curl localhost:14443/api/docs
