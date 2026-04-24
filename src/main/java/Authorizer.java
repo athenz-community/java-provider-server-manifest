@@ -13,6 +13,12 @@ public class Authorizer {
       if (System.getProperty("athenz.zpe.jwk_uri") == null) {
         System.setProperty("athenz.zpe.jwk_uri", DEFAULT_JWK_URI);
       }
+      if (System.getProperty("athenz.zpe.policy_dir") == null) {
+        System.setProperty("athenz.zpe.policy_dir", "./policies");
+      }
+      if (System.getProperty("athenz.zpe.check_policy_zms_signature") == null) {
+        System.setProperty("athenz.zpe.check_policy_zms_signature", "false");
+      }
       AuthZpeClient.init();
     }
   }
