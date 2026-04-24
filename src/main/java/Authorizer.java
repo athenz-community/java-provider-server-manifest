@@ -1,15 +1,48 @@
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.yahoo.athenz.zpe.AuthZpeClient;
+
+import java.security.cert.X509Certificate;
 
 public class Authorizer {
 
   private final boolean isRequired;
   private static final String DEFAULT_JWK_URI = "https://localhost:8443/zts/v1/oauth2/keys?rfc=true";
 
+  private void disableSslVerification() {
+    try {
+      TrustManager[] trustAllCerts = new TrustManager[] {
+          new X509TrustManager() {
+            public X509Certificate[] getAcceptedIssuers() {
+              return null;
+            }
+
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+          }
+      };
+      SSLContext sc = SSLContext.getInstance("SSL");
+      sc.init(null, trustAllCerts, new java.security.SecureRandom());
+      HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+      HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+    } catch (Exception e) {
+      System.err.println("🔥 [ERROR] Failed to disable SSL Verification: " + e.getMessage());
+    }
+  }
+
   public Authorizer() {
     this.isRequired = Boolean.parseBoolean(System.getenv().getOrDefault("AT_REQUIRED", "true"));
 
     if (this.isRequired) {
+      disableSslVerification();
+
       if (System.getProperty("athenz.zpe.jwk_uri") == null) {
         System.setProperty("athenz.zpe.jwk_uri", DEFAULT_JWK_URI);
       }
