@@ -38,23 +38,30 @@ public class Api {
 
             // TODO: Apply authorization logic inside the each method, rather than here.
             // TODO: Add more proper HTTP methods
-            if (AT_REQUIRED) {
-                String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
-                String token = (authHeader != null && authHeader.startsWith("Bearer "))
-                        ? authHeader.substring(7)
-                        : null;
+            try {
+                if (AT_REQUIRED) {
+                    String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
+                    String token = (authHeader != null && authHeader.startsWith("Bearer "))
+                            ? authHeader.substring(7)
+                            : null;
 
-                if (token == null) {
-                    sendResponse(exchange, 401, "{\"error\": \"Unauthorized: Missing token\"}");
-                    return;
+                    if (token == null) {
+                        sendResponse(exchange, 401, "{\"error\": \"Unauthorized: Missing token\"}");
+                        return;
+                    }
+
+                    String action = "GET".equalsIgnoreCase(method) ? "read" : "write";
+
+                    if (!authorizer.isAuthorized(action, RESOURCE_NAME, token)) {
+                        sendResponse(exchange, 403, "{\"error\": \"Forbidden by Athenz ZPE\"}");
+                        return;
+                    }
                 }
-
-                String action = "GET".equalsIgnoreCase(method) ? "read" : "write";
-
-                if (!authorizer.isAuthorized(action, RESOURCE_NAME, token)) {
-                    sendResponse(exchange, 403, "{\"error\": \"Forbidden by Athenz ZPE\"}");
-                    return;
-                }
+            } catch (Exception e) {
+                System.err.println("\n🔥 [ERROR] Something went wrong during authorization:");
+                e.printStackTrace();
+                sendResponse(exchange, 500, "{\"error\": \"Internal Server Error\"}");
+                return;
             }
 
             // --- Business Logic ---
