@@ -1,5 +1,4 @@
 PORT ?= 14443
-PORT_MCP ?= 8101
 AT_REQUIRED ?= true
 
 local:
@@ -15,14 +14,11 @@ update-policy:
   --cert ./athenz_dist/certs/athenz_admin.cert.pem \
   --key ./athenz_dist/keys/athenz_admin.private.pem > api.pol
 
+MCP_PORT ?= 8101
+
 mcp-local:
-	@if [ ! -d "mcp/node_modules" ]; then \
-		echo "Installing npm dependencies in mcp/ folder..."; \
-		(cd mcp && npm install); \
-	fi
-	@if [ ! -d "venv" ]; then \
-		echo "Creating venv and installing mcpo..."; \
-		python3 -m venv venv && ./venv/bin/pip install mcpo; \
-	fi
-	@echo "🚀 Running MCP Server on port $(PORT_MCP)..."
-	@./venv/bin/mcpo --port $(PORT_MCP) -- node mcp/server.js
+	(cd mcp && npm install @modelcontextprotocol/sdk@latest)
+	brew install python@3.11
+	/opt/homebrew/opt/python@3.11/bin/python3.11 -m venv venv
+	./venv/bin/pip install mcpo
+	(cd mcp && ../venv/bin/mcpo --port $(MCP_PORT) -- node mcp-server.js)
