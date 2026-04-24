@@ -13,7 +13,7 @@ public class Api {
     static JSONArray docs = new JSONArray();
 
     static final int PORT = Integer.parseInt(System.getenv().getOrDefault("PORT", "14443"));
-    static final boolean AT_REQUIRED = Boolean.parseBoolean(System.getenv().getOrDefault("AT_REQUIRED", "false"));
+    static final boolean AT_REQUIRED = Boolean.parseBoolean(System.getenv().getOrDefault("AT_REQUIRED", "true"));
     static final String RESOURCE_NAME = "shopping.api:docs";
     static final String DEFAULT_JWK_URI = "http://localhost:8443/zts/v1/jwk";
 
@@ -43,6 +43,11 @@ public class Api {
                 String token = (authHeader != null && authHeader.startsWith("Bearer "))
                         ? authHeader.substring(7)
                         : null;
+
+                if (token == null) {
+                    sendResponse(exchange, 401, "{\"error\": \"Unauthorized: Missing token\"}");
+                    return;
+                }
 
                 String action = "GET".equalsIgnoreCase(method) ? "read" : "write";
 
