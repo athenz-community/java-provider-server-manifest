@@ -36,6 +36,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 // When AI uses the tool
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const athenzAccessToken = await getAthenzToken();
+
   const headers = {
     "Authorization": `Bearer ${athenzAccessToken}`,
     "Content-Type": "application/json",

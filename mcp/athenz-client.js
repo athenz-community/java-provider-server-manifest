@@ -6,9 +6,9 @@ const ATHENZ_CONF = {
     hostname: "localhost",
     port: 8443,
   },
-  certPath: "../../athenz_dist/certs/athenz_admin.cert.pem",
-  keyPath: "../../athenz_dist/keys/athenz_admin.private.pem",
-  scope: "api:role.docs-getter api:role.docs-poster",
+  certPath: "/Users/jekim/test_dive/260419_093427_mcp_server/athenz_dist/certs/athenz_admin.cert.pem",
+  keyPath: "/Users/jekim/test_dive/260419_093427_mcp_server/athenz_dist/keys/athenz_admin.private.pem",
+  scope: "api:role.docs-getter api:role.docs-poster", // emtpy space separated string
 };
 
 let cachedToken = null;
@@ -22,7 +22,11 @@ export async function getAthenzToken() {
   }
 
   return new Promise((resolve, reject) => {
-    const postData = `grant_type=client_credentials&scope=${encodeURIComponent(ATHENZ_CONF.scope)}`;
+    const params = new URLSearchParams({
+      grant_type: "client_credentials",
+      scope: ATHENZ_CONF.scope,
+      expires_in: "3600"
+    });
 
     const options = {
       hostname: ATHENZ_CONF.zts.hostname,
@@ -34,8 +38,9 @@ export async function getAthenzToken() {
       rejectUnauthorized: false,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        "Content-Length": Buffer.byteLength(postData),
+        "Content-Length": Buffer.byteLength(params.toString()),
       },
+      timeout: 10000,
     };
 
     const req = https.request(options, (res) => {
@@ -53,7 +58,12 @@ export async function getAthenzToken() {
       });
     });
 
-    req.on("error", reject);
+    req.on("error", (err) => {
+      console.error("Request Error:", err);
+      reject(err);
+    });
+
+    req.write(params.toString());
     req.end();
   });
 }
