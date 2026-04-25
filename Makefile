@@ -13,3 +13,4 @@ update-policy:
   -H "Accept: application/json" \
   --cert ./athenz_dist/certs/athenz_admin.cert.pem \
   --key ./athenz_dist/keys/athenz_admin.private.pem > api.pol
+
