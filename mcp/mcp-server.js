@@ -2,6 +2,8 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
+import { getAthenzToken } from "./athenz-client.js";
+
 // Create MCP server
 const server = new Server(
   { name: "k8s-docs-server", version: "1.0.0" },
