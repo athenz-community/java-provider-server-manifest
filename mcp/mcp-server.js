@@ -12,9 +12,9 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
-    name: "get_k8s_docs",
-    description: "Get the list of documents from the API running on local Kubernetes.",
-    inputSchema: { type: "object", properties: {} } // no input parameters
+      name: "get_k8s_docs",
+      description: "Get the list of documents from the API running on local Kubernetes.",
+      inputSchema: { type: "object", properties: {} } // no input parameters
     },
     {
       name: "post_k8s_doc",
@@ -33,10 +33,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 
 // When AI uses the tool
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const athenzAccessToken = await getAthenzToken();
+  const headers = {
+    "Authorization": `Bearer ${athenzAccessToken}`,
+    "Content-Type": "application/json",
+  }
+
   if (request.params.name === "get_k8s_docs") {
     try {
       // Call the API running on local Kubernetes
-      const response = await fetch("http://localhost:14443/api/docs");
+      const response = await fetch("http://localhost:14443/api/docs", { headers });
       const data = await response.text();
       
       // Return the result to AI
@@ -50,7 +56,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       // Call the API running on local Kubernetes
       const response = await fetch("http://localhost:14443/api/docs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: headers,
         body: JSON.stringify(request.params)
       });
       const data = await response.text();
