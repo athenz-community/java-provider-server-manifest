@@ -1,7 +1,8 @@
 Run the server locally:
 
 ```sh
-make local
+git clone git@github.com:athenz-community/java-provider-server-manifest.git oss_sample_java_api_server
+make -C oss_sample_java_api_server local
 ```
 
 Then, open a new terminal and run:
