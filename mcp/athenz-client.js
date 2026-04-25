@@ -21,20 +21,21 @@ export async function getAthenzToken() {
     return cachedToken;
   }
 
-  console.error("[Athenz] Fetching new access token...");
-
   return new Promise((resolve, reject) => {
-    const cert = fs.readFileSync(ATHENZ_CONF.certPath);
-    const key = fs.readFileSync(ATHENZ_CONF.keyPath);
+    const postData = `grant_type=client_credentials&scope=${encodeURIComponent(ATHENZ_CONF.scope)}`;
 
     const options = {
       hostname: ATHENZ_CONF.zts.hostname,
       port: ATHENZ_CONF.zts.port,
-      path: `/zts/v1/oauth2/token?grant_type=client_credentials&scope=${ATHENZ_CONF.scope}`,
+      path: `/zts/v1/oauth2/token`,
       method: "POST",
-      key: key,
-      cert: cert,
+      key: fs.readFileSync(ATHENZ_CONF.keyPath),
+      cert: fs.readFileSync(ATHENZ_CONF.certPath),
       rejectUnauthorized: false,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Length": Buffer.byteLength(postData),
+      },
     };
 
     const req = https.request(options, (res) => {
