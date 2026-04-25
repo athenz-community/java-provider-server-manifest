@@ -6,8 +6,8 @@ const ATHENZ_CONF = {
     hostname: "localhost",
     port: 8443,
   },
-  certPath: "/Users/jekim/test_dive/260419_093427_mcp_server/athenz_dist/certs/athenz_admin.cert.pem",
-  keyPath: "/Users/jekim/test_dive/260419_093427_mcp_server/athenz_dist/keys/athenz_admin.private.pem",
+  certPath: "../../athenz_dist/certs/athenz_admin.cert.pem",
+  keyPath: "../../athenz_dist/keys/athenz_admin.private.pem",
   scope: "api:role.docs-getter api:role.docs-poster", // emtpy space separated string
 };
 
